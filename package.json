@@ -1,0 +1,22 @@
+{
+  "name": "doom-webitor",
+  "version": "1.0.0",
+  "description": "Doom Map editor for browsers",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TomTilly/doom-webitor.git"
+  },
+  "author": "Tom Tillistrand",
+  "contributors": [
+    "Thomas Foster"
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TomTilly/doom-webitor/issues"
+  },
+  "homepage": "https://github.com/TomTilly/doom-webitor#readme"
+}
