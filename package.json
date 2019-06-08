@@ -18,5 +18,10 @@
   "bugs": {
     "url": "https://github.com/TomTilly/doom-webitor/issues"
   },
-  "homepage": "https://github.com/TomTilly/doom-webitor#readme"
+  "homepage": "https://github.com/TomTilly/doom-webitor#readme",
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^1.9.0",
+    "@typescript-eslint/parser": "^1.9.0",
+    "eslint": "^5.16.0"
+  }
 }
