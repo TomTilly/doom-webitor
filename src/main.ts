@@ -1,7 +1,5 @@
 import { WadFile } from "./WadFile";
 
-const app = document.querySelector<HTMLDivElement>('#app')!;
-
 const inputEl = document.querySelector('input') as HTMLInputElement;
 
 
