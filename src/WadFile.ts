@@ -4,8 +4,7 @@ enum WadType {
     pwad = "PWAD"
 }
 
-export class DirectoryEntry
-{
+export class DirectoryEntry {
     filePosition: number;
     size: number; // if bytes
     name: string;
