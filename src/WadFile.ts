@@ -18,7 +18,6 @@ export class WadFile {
     directory: DirectoryEntry[];
 
     constructor(file: File) {
-        console.log(file);
         let fileReader = new FileReader();
 
         fileReader.readAsArrayBuffer(file);
@@ -29,10 +28,13 @@ export class WadFile {
             }
             this.buffer = check;
             
-            // Get Header ID String
-            let charArray = new Uint8Array(this.buffer, 0, 4);
+            let header = new DataView(this.buffer, 0, 12);
+
+            // get Header ID String
+
+            let charArray = new Uint8Array(header.buffer, 0, 4);
             let idString = String.fromCharCode(...charArray);
-            console.log(idString);
+            console.log('WAD type: ', idString);
 
             if ( !(idString == WadType.iwad || idString == WadType.pwad) ) {
                 throw new Error('Error: not a valid WAD file');
@@ -44,17 +46,15 @@ export class WadFile {
                 this.type = WadType.pwad;
             }
 
-            // Get Header number of lumps
-            let uint32 = new Uint32Array(this.buffer, 4, 1);
-            let array = Array.from(uint32);
-            this.numLumps = array[0];
+            // get number of lumps
+
+            this.numLumps = header.getUint32(4, true);
             console.log(this.numLumps);
-
-            let offset32array = new Uint32Array(this.buffer, 8, 1);
-            let array2 = Array.from(offset32array);
-            let directoryOffset = array2[0];
-
             
+            // get directory offset
+
+            let directoryOffset = header.getUint32(8);
+            console.log('dir: ', directoryOffset.toString(16));
         }
         fileReader.onerror = function(e) {
             throw new Error('Error: WAD file read error');
