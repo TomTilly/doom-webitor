@@ -44,7 +44,6 @@ export class WadFile {
 
          // get Header ID String
          const idString = this.getString(header, 0, 4);
-         console.log(idString);
          if (!(idString === WadType.iwad || idString === WadType.pwad)) {
             throw new Error('Error: not a valid WAD file');
          }
