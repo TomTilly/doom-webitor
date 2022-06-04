@@ -1,3 +1,5 @@
+const prettierSettings = require('./.prettierrc.js');
+
 module.exports = {
    root: true,
    parser: '@typescript-eslint/parser',
@@ -8,6 +10,7 @@ module.exports = {
    plugins: ['@typescript-eslint', 'prettier'],
    extends: [
       'eslint:recommended',
+      'plugin:@typescript-eslint/recommended',
       'plugin:@typescript-eslint/recommended-requiring-type-checking',
       'prettier',
    ],
@@ -15,10 +18,7 @@ module.exports = {
       'prettier/prettier': [
          'error',
          {
-            trailingComma: 'es5',
-            singleQuote: true,
-            printWidth: 80,
-            tabWidth: 3,
+            ...prettierSettings,
          },
       ],
    },
