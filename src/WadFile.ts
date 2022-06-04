@@ -45,7 +45,7 @@ export class WadFile {
          // get Header ID String
          const idString = this.getString(header, 0, 4);
          console.log(idString);
-         if (!(idString == WadType.iwad || idString == WadType.pwad)) {
+         if (!(idString === WadType.iwad || idString === WadType.pwad)) {
             throw new Error('Error: not a valid WAD file');
          }
 
@@ -62,7 +62,6 @@ export class WadFile {
          // get directory offset
 
          const directoryOffset = header.getUint32(8, true);
-         console.log('directory offset: ', directoryOffset);
 
          for (let i = 0; i < this.numLumps; i++) {
             const entryOffset = directoryOffset + i * 16;
