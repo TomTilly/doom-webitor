@@ -1,0 +1,30 @@
+{
+   // Set Prettier as the formatter for Typescript
+   "editor.tabSize": 3,
+   "editor.defaultFormatter": "esbenp.prettier-vscode", // uses Prettier extension formatter
+   "editor.formatOnSave": true,
+   "[javascript]": {
+      "editor.formatOnSave": false,
+      "editor.defaultFormatter": null // needed to prevent Prettier from formatting JS – replaces line from Wes Bos' config that does the same thing
+   },
+   "[javascriptreact]": {
+      "editor.formatOnSave": false,
+      "editor.defaultFormatter": null // needed to prevent Prettier from formatting JS – replaces line from Wes Bos' config that does the same thing
+   },
+   "[vue]": {
+      "editor.formatOnSave": false,
+      "editor.defaultFormatter": null
+   },
+   "[typescript]": {
+      "editor.formatOnSave": false,
+      "editor.defaultFormatter": null
+   },
+   "[typescriptreact]": {
+      "editor.formatOnSave": false,
+      "editor.defaultFormatter": null
+   },
+   "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true // tell the ESLint plugin to run on save
+   },
+   "eslint.debug": true
+}
