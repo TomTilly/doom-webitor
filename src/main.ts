@@ -1,15 +1,9 @@
 import { WadFile } from './WadFile';
+import testIWAD from '../wads/DOOM.WAD';
 
-const inputEl = document.querySelector('input') as HTMLInputElement;
+const response = await fetch(testIWAD);
+const arrayBuffer = await response.arrayBuffer();
 
-inputEl.addEventListener('change', (e) => {
-   /* eslint-disable no-useless-catch */
-   try {
-      const wadFile = new WadFile(e.target.files[0]);
-   } catch (error) {
-      throw error;
-   }
-   /* eslint-enable */
-});
+const wadFile = new WadFile(arrayBuffer);
 
 export {};
