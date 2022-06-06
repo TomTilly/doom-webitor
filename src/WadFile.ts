@@ -25,7 +25,7 @@ type LumpInfo = {
 
 export class WadFile {
    type!: WadType;
-   buffer!: ArrayBuffer; // the entire WAD as raw data
+   private buffer!: ArrayBuffer; // the entire WAD as raw data
    numLumps!: number;
    directory: LumpInfo[] = [];
 
@@ -58,15 +58,31 @@ export class WadFile {
          const entryOffset = directoryOffset + i * 16;
          const entry = new DataView(this.buffer, entryOffset, 16);
 
-         const info: LumpInfo = {
+         const lumpInfo: LumpInfo = {
             filePosition: entry.getUint32(0, true),
             size: entry.getUint32(4, true),
             name: this.getString(entry, 8, 8),
          };
-         this.directory.push(info);
+         this.directory.push(lumpInfo);
       }
 
       console.log(`Read WAD file with ${this.numLumps} lumps`);
+   }
+
+   getLump(num: number): ArrayBuffer {
+      const entry = this.directory[num];
+      return this.buffer.slice(
+         entry.filePosition,
+         entry.filePosition + entry.size
+      );
+   }
+
+   getLumpNumberWithName(name: string): number {
+      return this.directory.findIndex((lumpInfo) => lumpInfo.name === name);
+   }
+
+   getLumpNamed(name: string): ArrayBuffer {
+      return this.getLump(this.getLumpNumberWithName(name));
    }
 
    private getString(

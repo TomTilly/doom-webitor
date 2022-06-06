@@ -1,0 +1,56 @@
+----------------------------
+Program flow:
+
+
+'WELCOME' Screen:
+Create or open a PWAD?
+- choose which IWAD (the game for the map is for, and the assets to use) opens FILE VIEWER
+
+FILE VIEWER
+(Opened/Created a PWAD)
+- create map (choose ExMz or MAPxx). Edit... button available, opens EDITOR
+- merge an external PWAD?
+- copy one of the IWAD's maps to the PWAD so can be edited
+- info:
+	* see what maps are in this PWAD (possibility to add/remove/change map num)
+	* see what the associated IWAD is (possibility change)
+	* download PWAD
+
+EDITOR
+
+Edit points, lines, sectors, and things
+- Saving runs node builder and writes to PWAD
+- Launch external editor to test
+
+
+---------------------------
+Program Structure:
+
+
+class Project: hold IWAD and PWAD, info about PWAD content, loads map from WAD
+- init with IPAD and PWAD
+- open editor: load lump data into Map and init Editor with it
+
+class WadFile: represents an IWAD (read) or PWAD (read/write), data access
+- lump number for name -> int
+- get lump number -> ArrayBuffer slice
+- get lump with name -> ArrayBuffer slice
+
+class Map: contains all map data, manages changes (changes, additions, deletions)
+- init from lump data
+
+type Vertex: x and y
+- init from DataView
+
+type Line: indexes of end vertices, sidedefs, index of sectordef?
+- init from DataView
+
+type Thing: things data
+
+type Sector: sector data
+
+class Editor:
+- init with Map
+- contains state of the map view, scroll offsets, grid size, zoom level
+- contains logic: selecting elements
+- appearance: map view and side panel (element properties)
