@@ -1,4 +1,4 @@
-enum MapLumps {
+export enum MapLumps {
    things,
    linedefs,
    sidedefs,

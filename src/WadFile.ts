@@ -10,14 +10,6 @@ type LumpInfo = {
    name: string;
 };
 
-function createAndDownloadFile(file: File, filename: string): void {
-   const link = document.createElement('a');
-   const url = URL.createObjectURL(file);
-   link.href = url;
-   link.download = filename;
-   link.click();
-}
-
 // Format of an entire WAD file:
 // HEADER (12 bytes)
 // - id string 'IWAD' or 'PWAD' (Uint8[4])
@@ -96,10 +88,6 @@ export class WadFile {
       const headerView = new DataView(this.buffer, 0, id.length);
 
       this.writeString(id, headerView, 0);
-
-      // TEMP: test
-      const file = new File([this.buffer], 'new.wad');
-      //createAndDownloadFile(file, 'test.wad');
    }
 
    // resize this.buffer by amount
@@ -162,6 +150,15 @@ export class WadFile {
 
          writePosition += ENTRY_SIZE;
       }
+   }
+
+   saveAndDownload(filename: string): void {
+      const file = new File([this.buffer], filename);
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(file);
+      link.href = url;
+      link.download = filename;
+      link.click();
    }
 
    getLump(num: number): ArrayBuffer {
