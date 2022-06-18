@@ -1,4 +1,5 @@
 export enum MapLumps {
+   label,
    things,
    linedefs,
    sidedefs,
