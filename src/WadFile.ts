@@ -28,8 +28,17 @@ export class WadFile {
    private buffer!: ArrayBuffer; // the entire WAD as raw data
    numLumps!: number;
    directory: LumpInfo[] = [];
+   writePosition: number;
 
-   constructor(buffer: ArrayBuffer) {
+   constructor(buffer?: ArrayBuffer) {
+      if (buffer !== undefined) {
+         this.loadFromBuffer(buffer);
+      } else {
+         this.create();
+      }
+   }
+
+   private loadFromBuffer(buffer: ArrayBuffer) {
       this.buffer = buffer;
 
       const header = new DataView(this.buffer, 0, 12);
@@ -68,6 +77,24 @@ export class WadFile {
 
       console.log(`Read WAD file with ${this.numLumps} lumps`);
    }
+
+   private create() {
+      this.buffer = new ArrayBuffer(12);
+      const id = 'PWAD';
+      const view = new DataView(this.buffer, 0, id.length);
+      for (let i = 0; i < id.length; i++) {
+         view.setUint8(i, id.charCodeAt(i));
+      }
+
+      this.writePosition = 12; // make room for the header
+
+      // TEMP: test
+      const file = new File([this.buffer], 'new.wad');
+   }
+
+   // addLump() {
+
+   // }
 
    getLump(num: number): ArrayBuffer {
       const entry = this.directory[num];
