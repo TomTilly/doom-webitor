@@ -93,10 +93,9 @@ export class WadFile {
    private create() {
       this.buffer = new ArrayBuffer(HEADER_SIZE);
       const id = 'PWAD';
-      const view = new DataView(this.buffer, 0, id.length);
-      for (let i = 0; i < id.length; i++) {
-         view.setUint8(i, id.charCodeAt(i));
-      }
+      const headerView = new DataView(this.buffer, 0, id.length);
+
+      this.writeString(id, headerView, 0);
 
       // TEMP: test
       const file = new File([this.buffer], 'new.wad');
@@ -159,6 +158,7 @@ export class WadFile {
          const view = new DataView(this.buffer, writePosition, ENTRY_SIZE);
          view.setUint32(0, this.directory[i].filePosition, true);
          view.setUint32(4, this.directory[i].size, true);
+         this.writeString(this.directory[i].name, view, 8);
 
          writePosition += ENTRY_SIZE;
       }
@@ -178,6 +178,12 @@ export class WadFile {
 
    getLumpNamed(name: string): ArrayBuffer {
       return this.getLump(this.getLumpNumberWithName(name));
+   }
+
+   private writeString(string: string, view: DataView, offset: number): void {
+      for (let i = 0; i < string.length; i++) {
+         view.setUint8(i + offset, string.charCodeAt(i));
+      }
    }
 
    private getString(
