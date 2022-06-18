@@ -10,9 +10,14 @@ typedef struct
 } Header;
 
 
-int main()
+int main(int argc, char ** argv)
 {
-    FILE * wad = fopen("../wads/DOOM.WAD", "r");
+    if ( argc != 2 ) {
+        puts("please specify path to WAD file");
+        return 1;
+    }
+    
+    FILE * wad = fopen(argv[1], "r");
     
     if ( wad == NULL ) {
         puts("couldn't open wad");
