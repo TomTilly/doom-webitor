@@ -8,6 +8,8 @@ if (typeof testIWAD !== 'string') {
 const response = await fetch(testIWAD);
 const arrayBuffer = await response.arrayBuffer();
 
-const wadFile = new WadFile(arrayBuffer);
+// const wadFile = new WadFile(arrayBuffer);
+
+const wadFile = new WadFile();
 
 export {};

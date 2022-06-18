@@ -10,6 +10,14 @@ type LumpInfo = {
    name: string;
 };
 
+function createAndDownloadFile(file: File, filename: string): void {
+   const link = document.createElement('a');
+   const url = URL.createObjectURL(file);
+   link.href = url;
+   link.download = filename;
+   link.click();
+}
+
 // Format of an entire WAD file:
 // HEADER (12 bytes)
 // lump 0 (? bytes)
@@ -90,6 +98,7 @@ export class WadFile {
 
       // TEMP: test
       const file = new File([this.buffer], 'new.wad');
+      createAndDownloadFile(file, 'test.wad');
    }
 
    // addLump() {
