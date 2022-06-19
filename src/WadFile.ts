@@ -122,6 +122,10 @@ export class WadFile {
       };
       this.directory.push(entry);
 
+      console.log('entry.filePosition: ', entry.filePosition);
+      console.log('entry.size: ', entry.size);
+      console.log('entry.name: ', entry.name);
+
       this.increaseBufferSize(data.byteLength);
       this.insertData(data, entry.filePosition);
    }
@@ -131,8 +135,8 @@ export class WadFile {
 
       // complete WAD Header
       const headerView = new DataView(this.buffer, 0, HEADER_SIZE);
-      headerView.setUint32(4, this.directory.length); // number of lumps
-      headerView.setUint32(8, writePosition);
+      headerView.setUint32(4, this.directory.length, true); // number of lumps
+      headerView.setUint32(8, writePosition, true);
 
       // make room for entire directory
       this.increaseBufferSize(this.directory.length * ENTRY_SIZE);
