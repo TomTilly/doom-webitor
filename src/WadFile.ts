@@ -30,7 +30,7 @@ const HEADER_SIZE = 12;
 const ENTRY_SIZE = 16;
 
 export class WadFile {
-   type!: WadType;
+   type: WadType = WadType.pwad;
    private buffer!: ArrayBuffer; // the entire WAD as raw data
    directory: LumpInfo[] = [];
 
@@ -49,14 +49,13 @@ export class WadFile {
 
       // get Header ID String
       const idString = this.getString(header, 0, 4);
-      if (!(idString === WadType.iwad || idString === WadType.pwad)) {
-         throw new Error('Error: not a valid WAD file');
-      }
 
       if (idString === WadType.iwad) {
          this.type = WadType.iwad;
       } else if (idString === WadType.pwad) {
          this.type = WadType.pwad;
+      } else {
+         throw new Error('Error: not a valid WAD file');
       }
 
       // get number of lumps
@@ -84,6 +83,7 @@ export class WadFile {
 
    private create() {
       this.buffer = new ArrayBuffer(HEADER_SIZE);
+      this.type = WadType.pwad;
       const id = 'PWAD';
       const headerView = new DataView(this.buffer, 0, id.length);
 
