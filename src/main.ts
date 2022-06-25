@@ -1,6 +1,6 @@
 import { WadFile } from './WadFile';
 import doomWadURL from '../wads/DOOM.WAD';
-import { Map } from './Map';
+import Map from './Map';
 
 if (typeof doomWadURL !== 'string') {
    throw new Error('testIWAD should be a string.');
