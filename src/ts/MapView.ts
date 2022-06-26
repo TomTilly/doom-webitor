@@ -22,7 +22,7 @@ export default class MapView {
 
    drawMap() {
       const { context, map } = this;
-      const { points, lines } = map;
+      const { points, lines, things } = map;
 
       context.strokeStyle = 'rgb(0,0,0)';
       context.translate(-map.bounds.x, -map.bounds.y);
@@ -38,6 +38,10 @@ export default class MapView {
          context.moveTo(points[line.point1].x, points[line.point1].y);
          context.lineTo(points[line.point2].x, points[line.point2].y);
          context.stroke();
+      }
+
+      for (const thing of things) {
+         context.fillRect(thing.x - 16, thing.y - 16, 32, 32);
       }
    }
 }
