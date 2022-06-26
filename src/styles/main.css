@@ -7,14 +7,22 @@ body {
 .sidebar {
    width: 20%;
    background-color: #e1e1e1;
+   flex-shrink: 0;
 }
 
-.map-view {
+.scroll-view {
    flex-grow: 1;
    background-color: aliceblue;
+   max-height: 100vh;
+   overflow: scroll;
+}
+
+canvas {
+   display: block;
 }
 
 .inspector {
    width: 20%;
    background-color: #e1e1e1;
+   flex-shrink: 0;
 }

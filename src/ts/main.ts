@@ -1,6 +1,7 @@
 import { WadFile } from './WadFile';
 import doomWadURL from '/wads/DOOM.WAD';
 import Map from './Map';
+import MapView from './MapView';
 
 if (typeof doomWadURL !== 'string') {
    throw new Error('testIWAD should be a string.');
@@ -10,9 +11,13 @@ const response = await fetch(doomWadURL);
 const arrayBuffer = await response.arrayBuffer();
 
 const doomWad = new WadFile(arrayBuffer);
+const map = new Map(doomWad, 'E1M3');
+const canvas = document.getElementById('map-view') as HTMLCanvasElement;
+const mapView = new MapView(map, canvas);
+
 console.log(doomWad);
-const map = new Map(doomWad, 'E1M1');
 console.log(map);
+console.log(mapView);
 
 // const testWad = new WadFile();
 
