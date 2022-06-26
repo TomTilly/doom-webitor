@@ -1,5 +1,5 @@
 import { WadFile } from './WadFile';
-import doomWadURL from '../wads/DOOM.WAD';
+import doomWadURL from '/wads/DOOM.WAD';
 import Map from './Map';
 
 if (typeof doomWadURL !== 'string') {
