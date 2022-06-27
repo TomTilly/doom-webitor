@@ -68,11 +68,6 @@ export default class MapView {
          const walkX = this.prevX - x;
          const walkY = this.prevY - y;
 
-         console.group('mousemove');
-         console.log({ x, y });
-         console.log({ prevX: this.prevX, prevY: this.prevY });
-         console.log({ walkX, walkY });
-         console.groupEnd();
          if (walkX !== 0 || walkY !== 0) {
             container.scrollLeft += walkX;
             container.scrollTop += walkY;
