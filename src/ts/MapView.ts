@@ -68,7 +68,11 @@ export default class MapView {
          const walkX = this.prevX - x;
          const walkY = this.prevY - y;
 
+         console.group('mousemove');
+         console.log({ x, y });
+         console.log({ prevX: this.prevX, prevY: this.prevY });
          console.log({ walkX, walkY });
+         console.groupEnd();
          if (walkX !== 0 || walkY !== 0) {
             container.scrollLeft += walkX;
             container.scrollTop += walkY;
@@ -86,7 +90,12 @@ export default class MapView {
    }
 
    set isMouseDown(newValue) {
-      this.container.classList.toggle('map-view--active');
+      if (newValue === true) {
+         this.container.classList.add('map-view--active');
+      } else {
+         this.container.classList.remove('map-view--active');
+      }
+
       this._isMouseDown = newValue;
    }
 
