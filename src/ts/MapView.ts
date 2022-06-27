@@ -6,10 +6,6 @@ export default class MapView {
    private container: HTMLElement;
    private context: CanvasRenderingContext2D;
    private _isMouseDown = false;
-   private prevX: number;
-   private prevY: number;
-   private scrollInitialTop: number;
-   private scrollInitialLeft: number;
 
    constructor(map: Map, canvas: HTMLCanvasElement) {
       this.map = map;
@@ -41,11 +37,6 @@ export default class MapView {
 
       container.addEventListener('mousedown', (event) => {
          this.isMouseDown = true;
-         this.prevX = event.offsetX;
-         this.prevY = event.offsetY;
-
-         // this.scrollInitialLeft = container.scrollLeft;
-         // this.scrollInitialTop = container.scrollTop;
       });
 
       container.addEventListener('mouseleave', () => {
@@ -62,20 +53,8 @@ export default class MapView {
 
          // Scrolling
 
-         const x = event.offsetX;
-         const y = event.offsetY;
-
-         const walkX = this.prevX - x;
-         const walkY = this.prevY - y;
-
-         console.log({ walkX, walkY });
-         if (walkX !== 0 || walkY !== 0) {
-            container.scrollLeft += walkX;
-            container.scrollTop += walkY;
-
-            this.prevX = x;
-            this.prevY = y;
-         }
+         container.scrollLeft -= event.movementX;
+         container.scrollTop -= event.movementY;
       });
 
       this.drawMap();
