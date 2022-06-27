@@ -11,11 +11,17 @@ body {
    max-width: 300px;
 }
 
-.scroll-view {
+.map-view {
    flex-grow: 1;
    background-color: aliceblue;
    max-height: 100vh;
    overflow: scroll;
+   user-select: none;
+   cursor: grab;
+
+   &--active {
+      cursor: grabbing;
+   }
 }
 
 canvas {

@@ -12,13 +12,8 @@ const arrayBuffer = await response.arrayBuffer();
 
 const doomWad = new WadFile(arrayBuffer);
 const map = new Map(doomWad, 'E1M2');
-const canvas = document.getElementById('map-view') as HTMLCanvasElement;
+const canvas = document.getElementById('map') as HTMLCanvasElement;
 const mapView = new MapView(map, canvas);
-
-canvas.addEventListener('click', (e) => {
-   console.log('x', e.offsetX);
-   console.log('y', e.offsetY);
-});
 
 console.log(doomWad);
 console.log(map);

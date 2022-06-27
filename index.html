@@ -5,13 +5,13 @@
       <link rel="icon" type="image/svg+xml" href="favicon.svg" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Vite App</title>
-      <link rel="stylesheet" href="src/styles/main.css" />
-      <script type="module" src="src/ts/main.ts" defer></script>
+      <link rel="stylesheet" href="/src/styles/main.scss" />
+      <script type="module" src="/src/ts/main.ts" defer></script>
    </head>
    <body>
       <div class="sidebar"></div>
-      <div class="scroll-view">
-         <canvas id="map-view"></canvas>
+      <div class="map-view">
+         <canvas id="map" class="map-view__map"></canvas>
       </div>
       <div class="inspector"></div>
    </body>
