@@ -11,9 +11,12 @@ const response = await fetch(doomWadURL);
 const arrayBuffer = await response.arrayBuffer();
 
 const doomWad = new WadFile(arrayBuffer);
-const map = new Map(doomWad, 'E1M2');
+const map = new Map(doomWad, 'E4M1');
 const canvas = document.getElementById('map') as HTMLCanvasElement;
 const mapView = new MapView(map, canvas);
+
+const container = canvas.parentElement as HTMLDivElement;
+container.focus();
 
 console.log(doomWad);
 console.log(map);

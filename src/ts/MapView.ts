@@ -6,20 +6,11 @@ export default class MapView {
    private container: HTMLElement;
    private context: CanvasRenderingContext2D;
    private _isMouseDown = false;
+   private keysPressed: Set<string> = new Set<string>();
 
    constructor(map: Map, canvas: HTMLCanvasElement) {
       this.map = map;
       this.canvas = canvas;
-
-      // Set container
-
-      const container = canvas.parentElement;
-
-      if (container === null) {
-         throw new Error('Canvas has no parent element');
-      }
-
-      this.container = container;
 
       // Set initial canvas width and height and get 2D context
 
@@ -33,9 +24,42 @@ export default class MapView {
 
       this.context = context;
 
+      // Set container
+
+      const container = canvas.parentElement;
+
+      if (container === null) {
+         throw new Error('Canvas has no parent element');
+      }
+
+      this.container = container;
+
+      container.scrollLeft =
+         (container.scrollWidth - container.clientWidth) / 2;
+      container.scrollTop =
+         (container.scrollHeight - container.clientHeight) / 2;
+
       // Click and drag to scroll functionality
 
-      container.addEventListener('mousedown', (event) => {
+      container.addEventListener('keydown', (event) => {
+         event.preventDefault();
+         this.keysPressed.add(event.key);
+
+         if (event.key === ' ') {
+            container.classList.add('map-view--movement-mode');
+         }
+      });
+
+      container.addEventListener('keyup', (event) => {
+         event.preventDefault();
+         this.keysPressed.delete(event.key);
+
+         if (event.key === ' ') {
+            container.classList.remove('map-view--movement-mode');
+         }
+      });
+
+      container.addEventListener('mousedown', () => {
          this.isMouseDown = true;
       });
 
@@ -48,7 +72,7 @@ export default class MapView {
       });
 
       container.addEventListener('mousemove', (event) => {
-         if (!this.isMouseDown) return;
+         if (!this.isMouseDown || !this.keysPressed.has(' ')) return;
          event.preventDefault(); // prevent selection of text
 
          // Scrolling

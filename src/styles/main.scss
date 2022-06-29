@@ -17,9 +17,16 @@ body {
    max-height: 100vh;
    overflow: scroll;
    user-select: none;
-   cursor: grab;
 
-   &--active {
+   &:focus {
+      outline: none;
+   }
+
+   &--movement-mode {
+      cursor: grab;
+   }
+
+   &--movement-mode#{&}--active {
       cursor: grabbing;
    }
 }
