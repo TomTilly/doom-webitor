@@ -74,11 +74,12 @@ export default class MapView {
       container.addEventListener('mousemove', (event) => {
          if (!this.isMouseDown || !this.keysPressed.has(' ')) return;
          event.preventDefault(); // prevent selection of text
+         const { movementX, movementY } = event;
 
          // Scrolling
 
-         container.scrollLeft -= event.movementX;
-         container.scrollTop -= event.movementY;
+         container.scrollLeft -= movementX;
+         container.scrollTop -= movementY;
       });
 
       this.drawMap();
