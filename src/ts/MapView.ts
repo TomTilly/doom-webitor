@@ -1,12 +1,18 @@
 import Map from './Map';
+import { isPointInRect } from './geometry';
+import Rect from './Rect';
+
+const POINT_SIZE = 4;
+const THING_SIZE = 32;
 
 export default class MapView {
    private map: Map;
    private canvas: HTMLCanvasElement;
    private container: HTMLElement;
-   private context: CanvasRenderingContext2D;
+   private ctx: CanvasRenderingContext2D;
    private _isMouseDown = false;
    private keysPressed: Set<string> = new Set<string>();
+   private gridSize: 8 | 16 | 32 | 64 = 32;
 
    constructor(map: Map, canvas: HTMLCanvasElement) {
       this.map = map;
@@ -22,7 +28,7 @@ export default class MapView {
          throw new Error('2D context is null');
       }
 
-      this.context = context;
+      this.ctx = context;
 
       // Set container
 
@@ -82,6 +88,35 @@ export default class MapView {
          container.scrollTop -= movementY;
       });
 
+      canvas.addEventListener('mousedown', (event) => {
+         const worldX = event.offsetX + map.bounds.x;
+         const worldY = event.offsetY + map.bounds.y;
+         console.log({ worldX, worldY });
+
+         // Get nearest grid point
+         const gridX = Math.round(worldX / this.gridSize) * this.gridSize;
+         const gridY = Math.round(worldY / this.gridSize) * this.gridSize;
+         console.log({ gridX, gridY });
+
+         const clickRect = new Rect();
+         clickRect.makeSquare(worldX, worldY, POINT_SIZE + 2);
+         console.log(clickRect);
+
+         for (const point of map.points) {
+            point.selected = isPointInRect(point, clickRect);
+         }
+
+         console.log(map.points.filter((m) => m.selected));
+
+         this.drawMap();
+         // this.ctx.clearRect(
+         //    map.bounds.x,
+         //    map.bounds.y,
+         //    canvas.width,
+         //    canvas.height
+         // );
+      });
+
       this.drawMap();
    }
 
@@ -100,27 +135,111 @@ export default class MapView {
    }
 
    drawMap() {
-      const { context, map } = this;
+      const { ctx, map, gridSize, canvas } = this;
       const { points, lines, things } = map;
 
-      context.strokeStyle = 'rgb(0,0,0)';
-      context.translate(-map.bounds.x, -map.bounds.y);
+      ctx.translate(-map.bounds.x, -map.bounds.y);
 
-      // Draw points
+      ctx.clearRect(map.bounds.x, map.bounds.y, canvas.width, canvas.height);
+
+      // Draw grid lines
+
+      ctx.strokeStyle = '#dedede';
+
+      let gridStartX = map.bounds.x;
+      while (gridStartX % gridSize !== 0) {
+         gridStartX++;
+      }
+      let gridStartY = map.bounds.y;
+      while (gridStartY % gridSize !== 0) {
+         gridStartY++;
+      }
+      // Vertical
+      for (
+         let x = gridStartX;
+         x < map.bounds.x + map.bounds.width;
+         x += gridSize
+      ) {
+         if (x % 64 === 0) {
+            ctx.strokeStyle = '#A0A3F5';
+         } else {
+            ctx.strokeStyle = '#dedede';
+         }
+         ctx.beginPath();
+         ctx.moveTo(x, map.bounds.y);
+         ctx.lineTo(x, map.bounds.y + map.bounds.height);
+         ctx.stroke();
+      }
+      // Horizontal
+      for (
+         let y = gridStartY;
+         y < map.bounds.y + map.bounds.height;
+         y += gridSize
+      ) {
+         if (y % 64 === 0) {
+            ctx.strokeStyle = '#A0A3F5';
+         } else {
+            ctx.strokeStyle = '#dedede';
+         }
+         ctx.beginPath();
+         ctx.moveTo(map.bounds.x, y);
+         ctx.lineTo(map.bounds.x + map.bounds.width, y);
+         ctx.stroke();
+      }
+
+      // Draw points, lines, and things
 
       for (const point of points) {
-         context.fillRect(point.x - 2, point.y - 2, 4, 4);
+         if (point.selected) {
+            console.count('drawing selected point');
+            console.log(point);
+            console.log(ctx.fillStyle);
+            // ctx.fillStyle = 'red';
+            console.log(ctx.fillStyle);
+            console.log(map.bounds);
+            // ctx.fillRect(map.bounds.x, map.bounds.y, 40, 40);
+            ctx.clearRect(
+               map.bounds.x,
+               map.bounds.y,
+               canvas.width,
+               canvas.height
+            );
+            ctx.strokeStyle = 'orange';
+            ctx.beginPath();
+            ctx.moveTo(map.bounds.x, map.bounds.y);
+            ctx.lineTo(point.x, point.y);
+            ctx.stroke();
+            return;
+         } else {
+            ctx.fillStyle = 'blue';
+         }
+         point.selected ? console.log(ctx.fillStyle) : null;
+         // ctx.fillStyle = 'pink';
+         ctx.fillRect(
+            point.x - POINT_SIZE / 2,
+            point.y - POINT_SIZE / 2,
+            POINT_SIZE,
+            POINT_SIZE
+         );
       }
 
+      ctx.strokeStyle = 'rgb(0,0,0)';
       for (const line of lines) {
-         context.beginPath();
-         context.moveTo(points[line.point1].x, points[line.point1].y);
-         context.lineTo(points[line.point2].x, points[line.point2].y);
-         context.stroke();
+         ctx.beginPath();
+         ctx.moveTo(points[line.point1].x, points[line.point1].y);
+         ctx.lineTo(points[line.point2].x, points[line.point2].y);
+         ctx.stroke();
       }
+
+      ctx.fillStyle = 'rgb(0,0,0)';
 
       for (const thing of things) {
-         context.fillRect(thing.x - 16, thing.y - 16, 32, 32);
+         ctx.fillRect(
+            thing.x - THING_SIZE / 2,
+            thing.y - THING_SIZE / 2,
+            THING_SIZE,
+            THING_SIZE
+         );
       }
    }
 }
