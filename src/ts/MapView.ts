@@ -99,22 +99,20 @@ export default class MapView {
          console.log({ gridX, gridY });
 
          const clickRect = new Rect();
-         clickRect.makeSquare(worldX, worldY, POINT_SIZE + 2);
+         clickRect.makeSquare(worldX, worldY, POINT_SIZE + 4);
          console.log(clickRect);
 
+         let selected = false;
          for (const point of map.points) {
-            point.selected = isPointInRect(point, clickRect);
+            if (!selected && isPointInRect(point, clickRect)) {
+               point.selected = true;
+               selected = true;
+            } else {
+               point.selected = false;
+            }
          }
 
-         console.log(map.points.filter((m) => m.selected));
-
          this.drawMap();
-         // this.ctx.clearRect(
-         //    map.bounds.x,
-         //    map.bounds.y,
-         //    canvas.width,
-         //    canvas.height
-         // );
       });
 
       this.drawMap();
@@ -138,6 +136,7 @@ export default class MapView {
       const { ctx, map, gridSize, canvas } = this;
       const { points, lines, things } = map;
 
+      ctx.save();
       ctx.translate(-map.bounds.x, -map.bounds.y);
 
       ctx.clearRect(map.bounds.x, map.bounds.y, canvas.width, canvas.height);
@@ -189,40 +188,6 @@ export default class MapView {
 
       // Draw points, lines, and things
 
-      for (const point of points) {
-         if (point.selected) {
-            console.count('drawing selected point');
-            console.log(point);
-            console.log(ctx.fillStyle);
-            // ctx.fillStyle = 'red';
-            console.log(ctx.fillStyle);
-            console.log(map.bounds);
-            // ctx.fillRect(map.bounds.x, map.bounds.y, 40, 40);
-            ctx.clearRect(
-               map.bounds.x,
-               map.bounds.y,
-               canvas.width,
-               canvas.height
-            );
-            ctx.strokeStyle = 'orange';
-            ctx.beginPath();
-            ctx.moveTo(map.bounds.x, map.bounds.y);
-            ctx.lineTo(point.x, point.y);
-            ctx.stroke();
-            return;
-         } else {
-            ctx.fillStyle = 'blue';
-         }
-         point.selected ? console.log(ctx.fillStyle) : null;
-         // ctx.fillStyle = 'pink';
-         ctx.fillRect(
-            point.x - POINT_SIZE / 2,
-            point.y - POINT_SIZE / 2,
-            POINT_SIZE,
-            POINT_SIZE
-         );
-      }
-
       ctx.strokeStyle = 'rgb(0,0,0)';
       for (const line of lines) {
          ctx.beginPath();
@@ -241,5 +206,22 @@ export default class MapView {
             THING_SIZE
          );
       }
+
+      for (const point of points) {
+         if (point.selected) {
+            ctx.fillStyle = 'red';
+         } else {
+            ctx.fillStyle = 'black';
+         }
+
+         ctx.fillRect(
+            point.x - POINT_SIZE / 2,
+            point.y - POINT_SIZE / 2,
+            POINT_SIZE,
+            POINT_SIZE
+         );
+      }
+
+      ctx.restore();
    }
 }
