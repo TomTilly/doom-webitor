@@ -1,6 +1,7 @@
 import Map from './Map';
 import { isPointInRect } from './geometry';
 import Rect from './Rect';
+import Point from './Point';
 
 const POINT_SIZE = 4;
 const THING_SIZE = 32;
@@ -54,6 +55,14 @@ export default class MapView {
          if (event.key === ' ') {
             container.classList.add('map-view--movement-mode');
          }
+         if (event.key === '=') {
+            this.gridSize /= 2;
+            this.drawMap();
+         }
+         if (event.key === '-') {
+            this.gridSize *= 2;
+            this.drawMap();
+         }
       });
 
       container.addEventListener('keyup', (event) => {
@@ -98,25 +107,55 @@ export default class MapView {
          const gridY = Math.round(worldY / this.gridSize) * this.gridSize;
          console.log({ gridX, gridY });
 
-         const clickRect = new Rect();
-         clickRect.makeSquare(worldX, worldY, POINT_SIZE + 4);
-         console.log(clickRect);
-
-         // TODO Select closest point rather than first one we come across
-         let selected = false;
-         for (const point of map.points) {
-            if (!selected && isPointInRect(point, clickRect)) {
-               point.selected = true;
-               selected = true;
-            } else {
-               point.selected = false;
-            }
-         }
-
+         this.selectObject(worldX, worldY);
          this.drawMap();
       });
 
       this.drawMap();
+   }
+
+   // TODO: move to Editor
+   selectObject(worldX: number, worldY: number) {
+      const clickRect = new Rect(); // extra margin around clicked point
+      clickRect.makeSquare(worldX, worldY, POINT_SIZE + 4);
+
+      // try to select a point
+      // FIXME: clicking a point should deselect any selected line and things
+      let gotSelection = false;
+      for (const point of this.map.points) {
+         if (!gotSelection && isPointInRect(point.x, point.y, clickRect)) {
+            point.selected = true;
+            gotSelection = true;
+         } else {
+            if (!this.keysPressed.has('Shift')) {
+               point.selected = false;
+            }
+         }
+      }
+      if (gotSelection) {
+         return;
+      }
+
+      // TODO: try to select a line
+
+      // try to select a thing
+      gotSelection = false;
+      for (const thing of this.map.things) {
+         const rect = new Rect(
+            thing.x - THING_SIZE / 2,
+            thing.y - THING_SIZE / 2,
+            THING_SIZE,
+            THING_SIZE
+         );
+         if (!gotSelection && isPointInRect(worldX, worldY, rect)) {
+            thing.selected = true;
+            gotSelection = true;
+         } else {
+            if (!this.keysPressed.has('Shift')) {
+               thing.selected = false;
+            }
+         }
+      }
    }
 
    get isMouseDown() {
@@ -133,16 +172,12 @@ export default class MapView {
       this._isMouseDown = newValue;
    }
 
-   drawMap() {
-      const { ctx, map, gridSize, canvas } = this;
-      const { points, lines, things } = map;
+   drawSquare(centerX: number, centerY: number, size: number) {
+      this.ctx.fillRect(centerX - size / 2, centerY - size / 2, size, size);
+   }
 
-      ctx.save();
-      ctx.translate(-map.bounds.x, -map.bounds.y);
-
-      ctx.clearRect(map.bounds.x, map.bounds.y, canvas.width, canvas.height);
-
-      // Draw grid lines
+   drawGrid() {
+      const { ctx, map, gridSize } = this;
 
       ctx.strokeStyle = '#dedede';
 
@@ -154,75 +189,56 @@ export default class MapView {
       while (gridStartY % gridSize !== 0) {
          gridStartY++;
       }
+
       // Vertical
-      for (
-         let x = gridStartX;
-         x < map.bounds.x + map.bounds.width;
-         x += gridSize
-      ) {
-         if (x % 64 === 0) {
-            ctx.strokeStyle = '#A0A3F5';
-         } else {
-            ctx.strokeStyle = '#dedede';
-         }
+      for (let x = gridStartX; x < map.bounds.right(); x += gridSize) {
+         ctx.strokeStyle = x % 64 === 0 ? '#A0A3F5' : '#dedede';
          ctx.beginPath();
          ctx.moveTo(x, map.bounds.y);
          ctx.lineTo(x, map.bounds.y + map.bounds.height);
          ctx.stroke();
       }
+
       // Horizontal
-      for (
-         let y = gridStartY;
-         y < map.bounds.y + map.bounds.height;
-         y += gridSize
-      ) {
-         if (y % 64 === 0) {
-            ctx.strokeStyle = '#A0A3F5';
-         } else {
-            ctx.strokeStyle = '#dedede';
-         }
+      for (let y = gridStartY; y < map.bounds.bottom(); y += gridSize) {
+         ctx.strokeStyle = y % 64 === 0 ? '#A0A3F5' : '#dedede';
          ctx.beginPath();
          ctx.moveTo(map.bounds.x, y);
          ctx.lineTo(map.bounds.x + map.bounds.width, y);
          ctx.stroke();
       }
+   }
+
+   drawMap() {
+      const { ctx, map, canvas } = this;
+
+      ctx.save(); // ensure following translation is always from (0, 0)
+      ctx.translate(-map.bounds.x, -map.bounds.y);
+      ctx.clearRect(map.bounds.x, map.bounds.y, canvas.width, canvas.height);
+
+      this.drawGrid();
 
       // Draw points, lines, and things
+      const { points, lines, things } = map;
 
-      ctx.strokeStyle = 'rgb(0,0,0)';
       for (const line of lines) {
+         ctx.strokeStyle = 'rgb(0,0,0)'; // TODO: color
          ctx.beginPath();
          ctx.moveTo(points[line.point1].x, points[line.point1].y);
          ctx.lineTo(points[line.point2].x, points[line.point2].y);
          ctx.stroke();
       }
 
-      ctx.fillStyle = 'rgb(0,0,0)';
+      for (const point of points) {
+         ctx.fillStyle = point.selected ? 'red' : 'black';
+         this.drawSquare(point.x, point.y, POINT_SIZE);
+      }
 
       for (const thing of things) {
-         ctx.fillRect(
-            thing.x - THING_SIZE / 2,
-            thing.y - THING_SIZE / 2,
-            THING_SIZE,
-            THING_SIZE
-         );
+         ctx.fillStyle = thing.selected ? 'red' : 'black';
+         this.drawSquare(thing.x, thing.y, THING_SIZE);
       }
 
-      for (const point of points) {
-         if (point.selected) {
-            ctx.fillStyle = 'red';
-         } else {
-            ctx.fillStyle = 'black';
-         }
-
-         ctx.fillRect(
-            point.x - POINT_SIZE / 2,
-            point.y - POINT_SIZE / 2,
-            POINT_SIZE,
-            POINT_SIZE
-         );
-      }
-
-      ctx.restore();
+      ctx.restore(); // return canvas origin to (0, 0)
    }
 }
