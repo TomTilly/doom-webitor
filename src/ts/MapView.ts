@@ -102,6 +102,7 @@ export default class MapView {
          clickRect.makeSquare(worldX, worldY, POINT_SIZE + 4);
          console.log(clickRect);
 
+         // TODO Select closest point rather than first one we come across
          let selected = false;
          for (const point of map.points) {
             if (!selected && isPointInRect(point, clickRect)) {
