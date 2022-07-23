@@ -1,10 +1,10 @@
+// just a cartesian coordinate
 export default class Point {
    x: number;
    y: number;
-   selected = false;
 
-   constructor(dataView: DataView) {
-      this.x = dataView.getInt16(0, true);
-      this.y = dataView.getInt16(2, true);
+   constructor(x = 0, y = 0) {
+      this.x = x;
+      this.y = y;
    }
 }

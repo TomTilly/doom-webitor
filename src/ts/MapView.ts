@@ -1,6 +1,6 @@
 import Map from './Map';
-import { isPointInRect } from './geometry';
 import Rect from './Rect';
+import Vertex from './Vertex';
 import Point from './Point';
 
 const POINT_SIZE = 4;
@@ -98,16 +98,17 @@ export default class MapView {
       });
 
       canvas.addEventListener('mousedown', (event) => {
-         const worldX = event.offsetX + map.bounds.x;
-         const worldY = event.offsetY + map.bounds.y;
-         console.log({ worldX, worldY });
+         const worldPoint = new Point(
+            event.offsetX + map.bounds.origin.x,
+            event.offsetY + map.bounds.origin.y
+         );
 
          // Get nearest grid point
-         const gridX = Math.round(worldX / this.gridSize) * this.gridSize;
-         const gridY = Math.round(worldY / this.gridSize) * this.gridSize;
-         console.log({ gridX, gridY });
+         // const gridX = Math.round(worldX / this.gridSize) * this.gridSize;
+         // const gridY = Math.round(worldY / this.gridSize) * this.gridSize;
+         // console.log({ gridX, gridY });
 
-         this.selectObject(worldX, worldY);
+         this.selectObject(worldPoint);
          this.drawMap();
       });
 
@@ -115,24 +116,30 @@ export default class MapView {
    }
 
    // TODO: move to Editor
-   selectObject(worldX: number, worldY: number) {
-      const clickRect = new Rect(); // extra margin around clicked point
-      clickRect.makeSquare(worldX, worldY, POINT_SIZE + 4);
+   selectObject(worldPoint: Point) {
+      // extra margin around clicked point
+      const clickSize = POINT_SIZE + 4;
+      const clickRectOrigin = new Point(
+         worldPoint.x - clickSize / 2,
+         worldPoint.y - clickSize / 2
+      );
+      const clickRect = new Rect(clickRectOrigin, clickSize);
 
       // try to select a point
       // FIXME: clicking a point should deselect any selected line and things
       let gotSelection = false;
-      for (const point of this.map.points) {
-         if (!gotSelection && isPointInRect(point.x, point.y, clickRect)) {
-            point.selected = true;
+      for (const vertex of this.map.vertices) {
+         if (!gotSelection && clickRect.containsPoint(vertex)) {
+            vertex.selected = true;
             gotSelection = true;
          } else {
             if (!this.keysPressed.has('Shift')) {
-               point.selected = false;
+               vertex.selected = false;
             }
          }
       }
       if (gotSelection) {
+         // TODO: why?
          return;
       }
 
@@ -141,13 +148,13 @@ export default class MapView {
       // try to select a thing
       gotSelection = false;
       for (const thing of this.map.things) {
-         const rect = new Rect(
-            thing.x - THING_SIZE / 2,
-            thing.y - THING_SIZE / 2,
-            THING_SIZE,
-            THING_SIZE
+         const point = new Point(
+            thing.origin.x - THING_SIZE / 2,
+            thing.origin.y - THING_SIZE / 2
          );
-         if (!gotSelection && isPointInRect(worldX, worldY, rect)) {
+
+         const rect = new Rect(point, THING_SIZE, THING_SIZE);
+         if (!gotSelection && rect.containsPoint(worldPoint)) {
             thing.selected = true;
             gotSelection = true;
          } else {
@@ -181,11 +188,11 @@ export default class MapView {
 
       ctx.strokeStyle = '#dedede';
 
-      let gridStartX = map.bounds.x;
+      let gridStartX = map.bounds.origin.x;
       while (gridStartX % gridSize !== 0) {
          gridStartX++;
       }
-      let gridStartY = map.bounds.y;
+      let gridStartY = map.bounds.origin.y;
       while (gridStartY % gridSize !== 0) {
          gridStartY++;
       }
@@ -194,8 +201,8 @@ export default class MapView {
       for (let x = gridStartX; x < map.bounds.right(); x += gridSize) {
          ctx.strokeStyle = x % 64 === 0 ? '#A0A3F5' : '#dedede';
          ctx.beginPath();
-         ctx.moveTo(x, map.bounds.y);
-         ctx.lineTo(x, map.bounds.y + map.bounds.height);
+         ctx.moveTo(x, map.bounds.origin.y);
+         ctx.lineTo(x, map.bounds.origin.y + map.bounds.height);
          ctx.stroke();
       }
 
@@ -203,8 +210,8 @@ export default class MapView {
       for (let y = gridStartY; y < map.bounds.bottom(); y += gridSize) {
          ctx.strokeStyle = y % 64 === 0 ? '#A0A3F5' : '#dedede';
          ctx.beginPath();
-         ctx.moveTo(map.bounds.x, y);
-         ctx.lineTo(map.bounds.x + map.bounds.width, y);
+         ctx.moveTo(map.bounds.origin.x, y);
+         ctx.lineTo(map.bounds.origin.x + map.bounds.width, y);
          ctx.stroke();
       }
    }
@@ -213,13 +220,18 @@ export default class MapView {
       const { ctx, map, canvas } = this;
 
       ctx.save(); // ensure following translation is always from (0, 0)
-      ctx.translate(-map.bounds.x, -map.bounds.y);
-      ctx.clearRect(map.bounds.x, map.bounds.y, canvas.width, canvas.height);
+      ctx.translate(-map.bounds.origin.x, -map.bounds.origin.y);
+      ctx.clearRect(
+         map.bounds.origin.x,
+         map.bounds.origin.y,
+         canvas.width,
+         canvas.height
+      );
 
       this.drawGrid();
 
       // Draw points, lines, and things
-      const { points, lines, things } = map;
+      const { vertices: points, lines, things } = map;
 
       for (const line of lines) {
          ctx.strokeStyle = 'rgb(0,0,0)'; // TODO: color
@@ -230,13 +242,14 @@ export default class MapView {
       }
 
       for (const point of points) {
+         // TODO: filter and draw selected points separately
          ctx.fillStyle = point.selected ? 'red' : 'black';
          this.drawSquare(point.x, point.y, POINT_SIZE);
       }
 
       for (const thing of things) {
          ctx.fillStyle = thing.selected ? 'red' : 'black';
-         this.drawSquare(thing.x, thing.y, THING_SIZE);
+         this.drawSquare(thing.origin.x, thing.origin.y, THING_SIZE);
       }
 
       ctx.restore(); // return canvas origin to (0, 0)

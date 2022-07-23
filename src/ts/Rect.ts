@@ -1,30 +1,30 @@
+import Point from './Point';
+
 export default class Rect {
-   x: number;
-   y: number;
+   origin: Point; // upper left corner
    width: number;
    height: number;
 
-   // constructor(point: Point, size: number);
-   // constructor(x = 0, y = 0, width = 0, height = 0);
-   constructor(x = 0, y = 0, width = 0, height = 0) {
-      this.x = x;
-      this.y = y;
+   constructor(origin = new Point(), width = 0, height = 0) {
+      this.origin = origin;
       this.width = width;
       this.height = height;
    }
 
-   makeSquare(centerX: number, centerY: number, size: number): void {
-      this.x = centerX - size / 2;
-      this.y = centerY - size / 2;
-      this.width = size;
-      this.height = size;
-   }
-
    right(): number {
-      return this.x + this.width;
+      return this.origin.x + this.width;
    }
 
    bottom(): number {
-      return this.y + this.height;
+      return this.origin.y + this.height;
+   }
+
+   containsPoint(point: Point): boolean {
+      return (
+         point.x >= this.origin.x &&
+         point.x < this.right() &&
+         point.y >= this.origin.y &&
+         point.y < this.bottom()
+      );
    }
 }

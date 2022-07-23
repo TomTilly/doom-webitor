@@ -1,8 +1,9 @@
 import { WadFile } from './WadFile';
-import Point from './Point';
+import Vertex from './Vertex';
 import Line from './Line';
 import Thing from './Thing';
 import Rect from './Rect';
+import Point from './Point';
 
 enum MapLumps {
    label,
@@ -34,7 +35,7 @@ function translateCoord(
 }
 
 export default class Map {
-   points: Point[];
+   vertices: Vertex[];
    lines: Line[];
    things: Thing[];
    bounds = new Rect();
@@ -52,27 +53,27 @@ export default class Map {
       let top = -Number.MAX_VALUE;
       let bottom = Number.MAX_VALUE;
 
-      this.points = [];
+      this.vertices = [];
       for (let i = 0; i < numVertexes; i++) {
          const view = new DataView(vertexesLump, i * VERTEX_SIZE, VERTEX_SIZE);
-         const point = new Point(view);
+         const vertex = new Vertex(view);
 
-         if (point.y > top) {
-            top = point.y;
+         if (vertex.y > top) {
+            top = vertex.y;
          }
-         if (point.y < bottom) {
-            bottom = point.y;
+         if (vertex.y < bottom) {
+            bottom = vertex.y;
          }
 
-         this.points.push(point);
+         this.vertices.push(vertex);
       }
 
       const height = top - bottom;
-      for (const point of this.points) {
+      for (const vertex of this.vertices) {
          // point.y += height;
          // point.y = -point.y;
-         point.y = translateCoord(
-            point.y,
+         vertex.y = translateCoord(
+            vertex.y,
             height,
             CoordTranslation.nextToCanvas
          );
@@ -100,8 +101,8 @@ export default class Map {
       for (let i = 0; i < numThings; i++) {
          const view = new DataView(thingLump, i * THING_SIZE, THING_SIZE);
          const thing = new Thing(view);
-         thing.y = translateCoord(
-            thing.y,
+         thing.origin.y = translateCoord(
+            thing.origin.y,
             height,
             CoordTranslation.nextToCanvas
          );
@@ -117,23 +118,22 @@ export default class Map {
       let top = Number.MAX_VALUE;
       let bottom = -Number.MAX_VALUE;
 
-      for (const point of this.points) {
-         if (point.x < left) {
-            left = point.x;
+      for (const vertex of this.vertices) {
+         if (vertex.x < left) {
+            left = vertex.x;
          }
-         if (point.x > right) {
-            right = point.x;
+         if (vertex.x > right) {
+            right = vertex.x;
          }
-         if (point.y < top) {
-            top = point.y;
+         if (vertex.y < top) {
+            top = vertex.y;
          }
-         if (point.y > bottom) {
-            bottom = point.y;
+         if (vertex.y > bottom) {
+            bottom = vertex.y;
          }
       }
 
-      this.bounds.x = left;
-      this.bounds.y = top;
+      this.bounds.origin = new Point(left, top);
       this.bounds.width = right - left;
       this.bounds.height = bottom - top;
    }
