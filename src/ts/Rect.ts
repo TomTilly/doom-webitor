@@ -12,19 +12,19 @@ export default class Rect {
    }
 
    right(): number {
-      return this.origin.x + this.width;
+      return this.origin.x + this.width - 1;
    }
 
    bottom(): number {
-      return this.origin.y + this.height;
+      return this.origin.y + this.height - 1;
    }
 
    containsPoint(point: Point): boolean {
       return (
          point.x >= this.origin.x &&
-         point.x < this.right() &&
+         point.x <= this.right() &&
          point.y >= this.origin.y &&
-         point.y < this.bottom()
+         point.y <= this.bottom()
       );
    }
 }

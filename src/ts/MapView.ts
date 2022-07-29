@@ -123,7 +123,7 @@ export default class MapView {
          worldPoint.x - clickSize / 2,
          worldPoint.y - clickSize / 2
       );
-      const clickRect = new Rect(clickRectOrigin, clickSize);
+      const clickRect = new Rect(clickRectOrigin, clickSize, clickSize);
 
       // try to select a point
       // FIXME: clicking a point should deselect any selected line and things
