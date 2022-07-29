@@ -138,3 +138,5 @@ export default class Map {
       this.bounds.height = bottom - top;
    }
 }
+
+export type ReadonlyMap = Readonly<Map>;

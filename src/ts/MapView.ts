@@ -1,7 +1,7 @@
 import Rect from './Rect';
 import Point from './Point';
 import Editor from './Editor';
-import Map from './Map';
+import Map, { ReadonlyMap } from './Map';
 import { THING_SIZE, POINT_SIZE } from './constants';
 
 export default class MapView {
@@ -157,7 +157,7 @@ export default class MapView {
    }
 
    // TODO Find a way to make this readonly
-   drawMap(map: Map) {
+   drawMap(map: ReadonlyMap) {
       const { ctx, canvas } = this;
 
       ctx.save(); // ensure following translation is always from (0, 0)
