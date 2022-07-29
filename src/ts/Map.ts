@@ -139,4 +139,4 @@ export default class Map {
    }
 }
 
-export type ReadonlyMap = Readonly<Map>;
+//export type ReadonlyMap = Readonly<Map>;

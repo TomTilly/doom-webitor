@@ -14,8 +14,9 @@ const arrayBuffer = await response.arrayBuffer();
 const doomWad = new WadFile(arrayBuffer);
 const map = new Map(doomWad, 'E4M1');
 const canvas = document.getElementById('map') as HTMLCanvasElement;
+const editor = new Editor(map);
 const mapView = new MapView(canvas, editor);
-const editor = new Editor(map, mapView);
+editor.mapView = mapView;
 
 const container = canvas.parentElement as HTMLDivElement;
 container.focus();

@@ -1,7 +1,7 @@
 import Rect from './Rect';
 import Point from './Point';
 import Editor from './Editor';
-import Map, { ReadonlyMap } from './Map';
+import Map from './Map';
 import { THING_SIZE, POINT_SIZE } from './constants';
 
 export default class MapView {
@@ -18,9 +18,11 @@ export default class MapView {
       this.editor = editor;
 
       // Set initial canvas width and height and get 2D context
+      this.setCanvasSize(
+         this.editor.map.bounds.width,
+         this.editor.map.bounds.height
+      );
 
-      // this.canvas.width = width;
-      // this.canvas.height = height;
       const context = canvas.getContext('2d');
 
       if (context === null) {
@@ -55,11 +57,11 @@ export default class MapView {
          }
          if (event.key === '=') {
             this.gridSize /= 2;
-            this.drawMap();
+            this.drawMap(this.editor.map);
          }
          if (event.key === '-') {
             this.gridSize *= 2;
-            this.drawMap();
+            this.drawMap(this.editor.map);
          }
       });
 
@@ -98,6 +100,8 @@ export default class MapView {
       canvas.addEventListener('mousedown', (event) => {
          this.editor.mouseDown(event);
       });
+
+      this.drawMap(editor.map);
    }
 
    setCanvasSize(width: number, height: number) {
@@ -157,7 +161,7 @@ export default class MapView {
    }
 
    // TODO Find a way to make this readonly
-   drawMap(map: ReadonlyMap) {
+   drawMap(map: Readonly<Map>) {
       const { ctx, canvas } = this;
 
       ctx.save(); // ensure following translation is always from (0, 0)

@@ -5,16 +5,16 @@ import Rect from './Rect';
 import { THING_SIZE, POINT_SIZE } from './constants';
 
 export default class Editor {
-   private map: Map;
-   private mapView: MapView;
+   public map: Map;
+   public mapView!: MapView;
 
-   constructor(map: Map, mapView: MapView) {
+   constructor(map: Map) {
       this.map = map;
-      this.mapView = mapView;
+      // this.mapView = mapView;
 
       // TODO - Temporary, maybe not here
-      mapView.setCanvasSize(map.bounds.width, map.bounds.height);
-      mapView.drawMap(map);
+      // mapView.setCanvasSize(map.bounds.width, map.bounds.height);
+      // mapView.drawMap(map);
    }
 
    mouseDown(event: MouseEvent) {
