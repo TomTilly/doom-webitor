@@ -1,28 +1,26 @@
-import Map from './Map';
 import Rect from './Rect';
-import Vertex from './Vertex';
 import Point from './Point';
-
-const POINT_SIZE = 4;
-const THING_SIZE = 32;
+import Editor from './Editor';
+import Map from './Map';
+import { THING_SIZE, POINT_SIZE } from './constants';
 
 export default class MapView {
-   private map: Map;
    private canvas: HTMLCanvasElement;
+   private editor: Editor;
    private container: HTMLElement;
    private ctx: CanvasRenderingContext2D;
    private _isMouseDown = false;
-   private keysPressed: Set<string> = new Set<string>();
+   public keysPressed: Set<string> = new Set<string>();
    private gridSize: 8 | 16 | 32 | 64 = 32;
 
-   constructor(map: Map, canvas: HTMLCanvasElement) {
-      this.map = map;
+   constructor(canvas: HTMLCanvasElement, editor: Editor) {
       this.canvas = canvas;
+      this.editor = editor;
 
       // Set initial canvas width and height and get 2D context
 
-      canvas.width = map.bounds.width;
-      canvas.height = map.bounds.height;
+      // this.canvas.width = width;
+      // this.canvas.height = height;
       const context = canvas.getContext('2d');
 
       if (context === null) {
@@ -98,71 +96,13 @@ export default class MapView {
       });
 
       canvas.addEventListener('mousedown', (event) => {
-         const worldPoint = new Point(
-            event.offsetX + map.bounds.origin.x,
-            event.offsetY + map.bounds.origin.y
-         );
-
-         // Get nearest grid point
-         // const gridX = Math.round(worldX / this.gridSize) * this.gridSize;
-         // const gridY = Math.round(worldY / this.gridSize) * this.gridSize;
-         // console.log({ gridX, gridY });
-
-         this.selectObject(worldPoint);
-         this.drawMap();
+         this.editor.mouseDown(event);
       });
-
-      this.drawMap();
    }
 
-   // TODO: move to Editor
-   selectObject(worldPoint: Point) {
-      // extra margin around clicked point
-      const clickSize = POINT_SIZE + 4;
-      const clickRectOrigin = new Point(
-         worldPoint.x - clickSize / 2,
-         worldPoint.y - clickSize / 2
-      );
-      const clickRect = new Rect(clickRectOrigin, clickSize, clickSize);
-
-      // try to select a point
-      // FIXME: clicking a point should deselect any selected line and things
-      let gotSelection = false;
-      for (const vertex of this.map.vertices) {
-         if (!gotSelection && clickRect.containsPoint(vertex)) {
-            vertex.selected = true;
-            gotSelection = true;
-         } else {
-            if (!this.keysPressed.has('Shift')) {
-               vertex.selected = false;
-            }
-         }
-      }
-      if (gotSelection) {
-         // TODO: why?
-         return;
-      }
-
-      // TODO: try to select a line
-
-      // try to select a thing
-      gotSelection = false;
-      for (const thing of this.map.things) {
-         const point = new Point(
-            thing.origin.x - THING_SIZE / 2,
-            thing.origin.y - THING_SIZE / 2
-         );
-
-         const rect = new Rect(point, THING_SIZE, THING_SIZE);
-         if (!gotSelection && rect.containsPoint(worldPoint)) {
-            thing.selected = true;
-            gotSelection = true;
-         } else {
-            if (!this.keysPressed.has('Shift')) {
-               thing.selected = false;
-            }
-         }
-      }
+   setCanvasSize(width: number, height: number) {
+      this.canvas.width = width;
+      this.canvas.height = height;
    }
 
    get isMouseDown() {
@@ -183,41 +123,42 @@ export default class MapView {
       this.ctx.fillRect(centerX - size / 2, centerY - size / 2, size, size);
    }
 
-   drawGrid() {
-      const { ctx, map, gridSize } = this;
+   drawGrid(bounds: Rect) {
+      const { ctx, gridSize } = this;
 
       ctx.strokeStyle = '#dedede';
 
-      let gridStartX = map.bounds.origin.x;
+      let gridStartX = bounds.origin.x;
       while (gridStartX % gridSize !== 0) {
          gridStartX++;
       }
-      let gridStartY = map.bounds.origin.y;
+      let gridStartY = bounds.origin.y;
       while (gridStartY % gridSize !== 0) {
          gridStartY++;
       }
 
       // Vertical
-      for (let x = gridStartX; x < map.bounds.right(); x += gridSize) {
+      for (let x = gridStartX; x < bounds.right(); x += gridSize) {
          ctx.strokeStyle = x % 64 === 0 ? '#A0A3F5' : '#dedede';
          ctx.beginPath();
-         ctx.moveTo(x, map.bounds.origin.y);
-         ctx.lineTo(x, map.bounds.origin.y + map.bounds.height);
+         ctx.moveTo(x, bounds.origin.y);
+         ctx.lineTo(x, bounds.origin.y + bounds.height);
          ctx.stroke();
       }
 
       // Horizontal
-      for (let y = gridStartY; y < map.bounds.bottom(); y += gridSize) {
+      for (let y = gridStartY; y < bounds.bottom(); y += gridSize) {
          ctx.strokeStyle = y % 64 === 0 ? '#A0A3F5' : '#dedede';
          ctx.beginPath();
-         ctx.moveTo(map.bounds.origin.x, y);
-         ctx.lineTo(map.bounds.origin.x + map.bounds.width, y);
+         ctx.moveTo(bounds.origin.x, y);
+         ctx.lineTo(bounds.origin.x + bounds.width, y);
          ctx.stroke();
       }
    }
 
-   drawMap() {
-      const { ctx, map, canvas } = this;
+   // TODO Find a way to make this readonly
+   drawMap(map: Map) {
+      const { ctx, canvas } = this;
 
       ctx.save(); // ensure following translation is always from (0, 0)
       ctx.translate(-map.bounds.origin.x, -map.bounds.origin.y);
@@ -228,7 +169,7 @@ export default class MapView {
          canvas.height
       );
 
-      this.drawGrid();
+      this.drawGrid(map.bounds);
 
       // Draw points, lines, and things
       const { vertices: points, lines, things } = map;

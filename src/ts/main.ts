@@ -2,6 +2,7 @@ import { WadFile } from './WadFile';
 import doomWadURL from '/wads/DOOM.WAD';
 import Map from './Map';
 import MapView from './MapView';
+import Editor from './Editor';
 
 if (typeof doomWadURL !== 'string') {
    throw new Error('testIWAD should be a string.');
@@ -13,7 +14,8 @@ const arrayBuffer = await response.arrayBuffer();
 const doomWad = new WadFile(arrayBuffer);
 const map = new Map(doomWad, 'E4M1');
 const canvas = document.getElementById('map') as HTMLCanvasElement;
-const mapView = new MapView(map, canvas);
+const mapView = new MapView(canvas, editor);
+const editor = new Editor(map, mapView);
 
 const container = canvas.parentElement as HTMLDivElement;
 container.focus();
