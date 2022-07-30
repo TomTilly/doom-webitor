@@ -1,10 +1,13 @@
+import Point from './Point';
+
 export default class Vertex {
-   x: number;
-   y: number;
+   origin: Point;
    selected = false;
 
    constructor(dataView: DataView) {
-      this.x = dataView.getInt16(0, true);
-      this.y = dataView.getInt16(2, true);
+      this.origin = new Point(
+         dataView.getInt16(0, true),
+         dataView.getInt16(2, true)
+      );
    }
 }

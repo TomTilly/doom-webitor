@@ -1,6 +1,6 @@
 import { WadFile } from './WadFile';
 import doomWadURL from '/wads/DOOM.WAD';
-import Map from './Map';
+import DoomMap from './DoomMap';
 import MapView from './MapView';
 import Editor from './Editor';
 
@@ -12,7 +12,7 @@ const response = await fetch(doomWadURL);
 const arrayBuffer = await response.arrayBuffer();
 
 const doomWad = new WadFile(arrayBuffer);
-const map = new Map(doomWad, 'E4M1');
+const map = new DoomMap(doomWad, 'E4M1');
 const canvas = document.getElementById('map') as HTMLCanvasElement;
 const editor = new Editor(map);
 const mapView = new MapView(canvas, editor);

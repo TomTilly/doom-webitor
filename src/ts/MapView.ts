@@ -1,8 +1,8 @@
 import Rect from './Rect';
-import Point from './Point';
 import Editor from './Editor';
-import Map from './Map';
+import DoomMap from './DoomMap';
 import { THING_SIZE, POINT_SIZE } from './constants';
+import Thing from './Thing';
 
 export default class MapView {
    private canvas: HTMLCanvasElement;
@@ -161,7 +161,7 @@ export default class MapView {
    }
 
    // TODO Find a way to make this readonly
-   drawMap(map: Readonly<Map>) {
+   drawMap(map: Readonly<DoomMap>) {
       const { ctx, canvas } = this;
 
       ctx.save(); // ensure following translation is always from (0, 0)
@@ -176,24 +176,40 @@ export default class MapView {
       this.drawGrid(map.bounds);
 
       // Draw points, lines, and things
-      const { vertices: points, lines, things } = map;
+      const { vertices, lines, things } = map;
 
       for (const line of lines) {
-         ctx.strokeStyle = 'rgb(0,0,0)'; // TODO: color
+         ctx.strokeStyle = line.selected ? 'red' : 'black'; // TODO: color
          ctx.beginPath();
-         ctx.moveTo(points[line.point1].x, points[line.point1].y);
-         ctx.lineTo(points[line.point2].x, points[line.point2].y);
+         ctx.moveTo(
+            vertices[line.vertex1].origin.x,
+            vertices[line.vertex1].origin.y
+         );
+         ctx.lineTo(
+            vertices[line.vertex2].origin.x,
+            vertices[line.vertex2].origin.y
+         );
          ctx.stroke();
       }
 
-      for (const point of points) {
+      for (const vertex of vertices) {
          // TODO: filter and draw selected points separately
-         ctx.fillStyle = point.selected ? 'red' : 'black';
-         this.drawSquare(point.x, point.y, POINT_SIZE);
+         ctx.fillStyle = vertex.selected ? 'red' : 'black';
+         this.drawSquare(vertex.origin.x, vertex.origin.y, POINT_SIZE);
       }
 
+      // TODO: Figure out solution for selecting stacked things
+      const selectedThings: Thing[] = [];
       for (const thing of things) {
-         ctx.fillStyle = thing.selected ? 'red' : 'black';
+         if (thing.selected) {
+            selectedThings.push(thing);
+            continue;
+         }
+         ctx.fillStyle = 'black';
+         this.drawSquare(thing.origin.x, thing.origin.y, THING_SIZE);
+      }
+      for (const thing of selectedThings) {
+         ctx.fillStyle = 'red';
          this.drawSquare(thing.origin.x, thing.origin.y, THING_SIZE);
       }
 

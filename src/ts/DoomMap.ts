@@ -34,7 +34,7 @@ function translateCoord(
    return -translated;
 }
 
-export default class Map {
+export default class DoomMap {
    vertices: Vertex[];
    lines: Line[];
    things: Thing[];
@@ -58,11 +58,11 @@ export default class Map {
          const view = new DataView(vertexesLump, i * VERTEX_SIZE, VERTEX_SIZE);
          const vertex = new Vertex(view);
 
-         if (vertex.y > top) {
-            top = vertex.y;
+         if (vertex.origin.y > top) {
+            top = vertex.origin.y;
          }
-         if (vertex.y < bottom) {
-            bottom = vertex.y;
+         if (vertex.origin.y < bottom) {
+            bottom = vertex.origin.y;
          }
 
          this.vertices.push(vertex);
@@ -72,8 +72,8 @@ export default class Map {
       for (const vertex of this.vertices) {
          // point.y += height;
          // point.y = -point.y;
-         vertex.y = translateCoord(
-            vertex.y,
+         vertex.origin.y = translateCoord(
+            vertex.origin.y,
             height,
             CoordTranslation.nextToCanvas
          );
@@ -119,17 +119,17 @@ export default class Map {
       let bottom = -Number.MAX_VALUE;
 
       for (const vertex of this.vertices) {
-         if (vertex.x < left) {
-            left = vertex.x;
+         if (vertex.origin.x < left) {
+            left = vertex.origin.x;
          }
-         if (vertex.x > right) {
-            right = vertex.x;
+         if (vertex.origin.x > right) {
+            right = vertex.origin.x;
          }
-         if (vertex.y < top) {
-            top = vertex.y;
+         if (vertex.origin.y < top) {
+            top = vertex.origin.y;
          }
-         if (vertex.y > bottom) {
-            bottom = vertex.y;
+         if (vertex.origin.y > bottom) {
+            bottom = vertex.origin.y;
          }
       }
 
@@ -138,5 +138,3 @@ export default class Map {
       this.bounds.height = bottom - top;
    }
 }
-
-//export type ReadonlyMap = Readonly<Map>;
