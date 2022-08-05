@@ -86,10 +86,20 @@ export default class DoomMap {
       const numLines = lineLump.byteLength / LINE_SIZE;
 
       this.lines = [];
+      const usedVertices: Set<number> = new Set();
       for (let i = 0; i < numLines; i++) {
          const view = new DataView(lineLump, i * LINE_SIZE, LINE_SIZE);
-         this.lines.push(new Line(view));
+         const line = new Line(view);
+         usedVertices.add(line.vertex1);
+         usedVertices.add(line.vertex2);
+         this.lines.push(line);
       }
+
+      // Filter unused vertices out
+
+      this.vertices = this.vertices.filter((vertex, i) => {
+         return usedVertices.has(i);
+      });
 
       // Read things from wad
 
