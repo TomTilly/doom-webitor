@@ -97,7 +97,7 @@ export default class DoomMap {
 
       // Filter unused vertices out
 
-      this.vertices = this.vertices.filter((vertex, i) => {
+      this.vertices = this.vertices.filter((_, i) => {
          return usedVertices.has(i);
       });
 
