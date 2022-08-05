@@ -1,8 +1,9 @@
 import Rect from './Rect';
-import Editor from './Editor';
+import Editor, { EditorMode } from './Editor';
 import DoomMap from './DoomMap';
 import { THING_SIZE, POINT_SIZE } from './constants';
 import Thing from './Thing';
+import Point from './Point';
 
 export default class MapView {
    private canvas: HTMLCanvasElement;
@@ -52,25 +53,40 @@ export default class MapView {
          event.preventDefault();
          this.keysPressed.add(event.key);
 
-         if (event.key === ' ') {
-            container.classList.add('map-view--movement-mode');
-         }
-         if (event.key === '=') {
-            this.gridSize /= 2;
-            this.drawMap(this.editor.map);
-         }
-         if (event.key === '-') {
-            this.gridSize *= 2;
-            this.drawMap(this.editor.map);
+         switch (event.key) {
+            case ' ':
+               container.classList.add('map-view--movement-mode');
+               this.editor.mode = EditorMode.scroll;
+               break;
+            case '=':
+               this.gridSize /= 2;
+               this.drawMap(this.editor.map);
+               break;
+            case '-':
+               this.gridSize *= 2;
+               this.drawMap(this.editor.map);
+               break;
+            case 'v':
+               this.editor.mode = EditorMode.vertex;
+               break;
+            default:
+               break;
          }
       });
 
       container.addEventListener('keyup', (event) => {
          event.preventDefault();
          this.keysPressed.delete(event.key);
-
-         if (event.key === ' ') {
-            container.classList.remove('map-view--movement-mode');
+         switch (event.key) {
+            case ' ':
+               container.classList.remove('map-view--movement-mode');
+               this.editor.mode = EditorMode.select;
+               break;
+            case 'v':
+               this.editor.mode = EditorMode.select;
+               break;
+            default:
+               break;
          }
       });
 
@@ -98,7 +114,24 @@ export default class MapView {
       });
 
       canvas.addEventListener('mousedown', (event) => {
-         this.editor.mouseDown(event);
+         const worldPoint = this.editor.canvasToWorld(event);
+
+         switch (this.editor.mode) {
+            case EditorMode.select:
+               this.editor.selectObject(worldPoint);
+               break;
+            case EditorMode.vertex:
+               this.editor.selectObject(worldPoint);
+               break;
+            case EditorMode.line:
+               break;
+            case EditorMode.thing:
+               break;
+            default:
+               break;
+         }
+
+         this.drawMap(editor.map);
       });
 
       this.drawMap(editor.map);
