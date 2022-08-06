@@ -15,7 +15,6 @@ export enum EditorMode {
 export default class Editor {
    public map: DoomMap;
    public mapView!: MapView;
-   public keysPressed: Set<string> = new Set<string>();
    public mode: EditorMode = EditorMode.select;
 
    constructor(map: DoomMap) {
@@ -29,18 +28,27 @@ export default class Editor {
 
    // keyDown()
 
-   mouseDown(event: MouseEvent) {
-      const worldPoint = new Point(
-         event.offsetX + this.map.bounds.origin.x,
-         event.offsetY + this.map.bounds.origin.y
-      );
+   // TODO: remove? likely to remove because mousedown is handled in MapView
+   // mouseDown(event: MouseEvent) {
+   //    const worldPoint = new Point(
+   //       event.offsetX + this.map.bounds.origin.x,
+   //       event.offsetY + this.map.bounds.origin.y
+   //    );
 
-      // Get nearest grid point
-      // const gridX = Math.round(worldX / this.gridSize) * this.gridSize;
-      // const gridY = Math.round(worldY / this.gridSize) * this.gridSize;
+   //    // Get nearest grid point
+   //    // const gridX = Math.round(worldX / this.gridSize) * this.gridSize;
+   //    // const gridY = Math.round(worldY / this.gridSize) * this.gridSize;
 
-      this.selectObject(worldPoint);
-      this.mapView.drawMap(this.map);
+   //    this.selectObject(worldPoint);
+   //    this.mapView.drawMap(this.map);
+   // }
+
+   dragObjects(worldPoint: Point): void {
+      this.map.things
+         .filter((thing) => thing.selected === true)
+         .forEach((thing) => {
+            thing.origin = worldPoint;
+         });
    }
 
    canvasToWorld(event: MouseEvent): Point {
@@ -71,7 +79,7 @@ export default class Editor {
          }
       };
 
-      deselectAll();
+      if (!this.mapView.keysPressed.has('Shift')) deselectAll();
 
       // try to select a point
       if (this.mode === EditorMode.select || this.mode === EditorMode.vertex) {

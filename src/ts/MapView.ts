@@ -10,6 +10,8 @@ export default class MapView {
    private editor: Editor;
    private container: HTMLElement;
    private ctx: CanvasRenderingContext2D;
+   private movementX: number;
+   private movementY: number;
    private _isMouseDown = false;
    public keysPressed: Set<string> = new Set<string>();
    private gridSize: 8 | 16 | 32 | 64 = 32;
@@ -49,8 +51,10 @@ export default class MapView {
 
       // Click and drag to scroll functionality
 
-      container.addEventListener('keydown', (event) => {
+      canvas.addEventListener('keydown', (event) => {
          event.preventDefault();
+
+         // TODO: Remove?
          this.keysPressed.add(event.key);
 
          switch (event.key) {
@@ -74,8 +78,10 @@ export default class MapView {
          }
       });
 
-      container.addEventListener('keyup', (event) => {
+      canvas.addEventListener('keyup', (event) => {
          event.preventDefault();
+
+         // TODO: Remove?
          this.keysPressed.delete(event.key);
          switch (event.key) {
             case ' ':
@@ -90,30 +96,8 @@ export default class MapView {
          }
       });
 
-      container.addEventListener('mousedown', () => {
-         this.isMouseDown = true;
-      });
-
-      container.addEventListener('mouseleave', () => {
-         this.isMouseDown = false;
-      });
-
-      container.addEventListener('mouseup', () => {
-         this.isMouseDown = false;
-      });
-
-      container.addEventListener('mousemove', (event) => {
-         if (!this.isMouseDown || !this.keysPressed.has(' ')) return;
-         event.preventDefault(); // prevent selection of text
-         const { movementX, movementY } = event;
-
-         // Scrolling
-
-         container.scrollLeft -= movementX;
-         container.scrollTop -= movementY;
-      });
-
       canvas.addEventListener('mousedown', (event) => {
+         this.isMouseDown = true;
          const worldPoint = this.editor.canvasToWorld(event);
 
          switch (this.editor.mode) {
@@ -132,6 +116,42 @@ export default class MapView {
          }
 
          this.drawMap(editor.map);
+      });
+
+      canvas.addEventListener('mousemove', (event) => {
+         event.preventDefault(); // prevent selection of text
+         if (!this.isMouseDown) return;
+
+         const worldPoint = this.editor.canvasToWorld(event);
+         const { movementX, movementY } = event;
+         this.movementX = movementX;
+         this.movementY = movementY;
+
+         // Scrolling
+         switch (this.editor.mode) {
+            case EditorMode.scroll:
+               container.scrollLeft -= movementX;
+               container.scrollTop -= movementY;
+               break;
+            case EditorMode.select:
+            case EditorMode.vertex:
+            case EditorMode.line:
+            case EditorMode.thing:
+               // move anything selected
+               this.editor.dragObjects(worldPoint);
+               this.drawMap(editor.map);
+               break;
+            default:
+               break;
+         }
+      });
+
+      canvas.addEventListener('mouseleave', () => {
+         this.isMouseDown = false;
+      });
+
+      canvas.addEventListener('mouseup', () => {
+         this.isMouseDown = false;
       });
 
       this.drawMap(editor.map);
