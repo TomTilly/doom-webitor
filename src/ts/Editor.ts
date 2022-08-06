@@ -43,12 +43,32 @@ export default class Editor {
    //    this.mapView.drawMap(this.map);
    // }
 
-   dragObjects(worldPoint: Point): void {
+   cursor: Point = new Point();
+   dragged: Point = new Point();
+   dragObjects(event: MouseEvent): void {
+      this.cursor = this.canvasToWorldGridPoint(event);
+
       this.map.things
          .filter((thing) => thing.selected === true)
          .forEach((thing) => {
-            thing.origin = worldPoint;
+            thing.origin.x += this.cursor.x - this.dragged.x;
+            thing.origin.y += this.cursor.y - this.dragged.y;
          });
+
+      this.dragged = this.cursor;
+   }
+
+   canvasToWorldGridPoint(event: MouseEvent): Point {
+      const worldPoint = this.canvasToWorld(event);
+
+      // Get nearest grid point
+      const gridX =
+         Math.round(worldPoint.x / this.mapView.gridSize) *
+         this.mapView.gridSize;
+      const gridY =
+         Math.round(worldPoint.y / this.mapView.gridSize) *
+         this.mapView.gridSize;
+      return new Point(gridX, gridY);
    }
 
    canvasToWorld(event: MouseEvent): Point {
@@ -58,7 +78,21 @@ export default class Editor {
       );
    }
 
-   selectObject(worldPoint: Point) {
+   // TODO: Move to DoomMap
+   deselectAll() {
+      for (const vertex of this.map.vertices) {
+         vertex.selected = false;
+      }
+      for (const line of this.map.lines) {
+         line.selected = false;
+      }
+      for (const thing of this.map.things) {
+         thing.selected = false;
+      }
+   }
+
+   selectObject(event: MouseEvent) {
+      const worldPoint = this.canvasToWorld(event);
       // extra margin around clicked point
       const clickSize = POINT_SIZE + 4;
       const clickRectOrigin = new Point(
@@ -66,20 +100,6 @@ export default class Editor {
          worldPoint.y - clickSize / 2
       );
       const clickRect = new Rect(clickRectOrigin, clickSize, clickSize);
-
-      const deselectAll = () => {
-         for (const vertex of this.map.vertices) {
-            vertex.selected = false;
-         }
-         for (const line of this.map.lines) {
-            line.selected = false;
-         }
-         for (const thing of this.map.things) {
-            thing.selected = false;
-         }
-      };
-
-      if (!this.mapView.keysPressed.has('Shift')) deselectAll();
 
       // try to select a point
       if (this.mode === EditorMode.select || this.mode === EditorMode.vertex) {
@@ -113,10 +133,23 @@ export default class Editor {
 
             const rect = new Rect(point, THING_SIZE, THING_SIZE);
             if (rect.containsPoint(worldPoint)) {
-               thing.selected = true;
+               if (thing.selected) {
+                  if (this.mapView.keysPressed.has('Shift')) {
+                     thing.selected = false;
+                  }
+               } else {
+                  if (!this.mapView.keysPressed.has('Shift')) {
+                     this.deselectAll();
+                  }
+                  thing.selected = true;
+                  this.cursor = this.canvasToWorldGridPoint(event);
+                  this.dragged = this.canvasToWorldGridPoint(event);
+               }
                return;
             }
          }
       }
+
+      this.deselectAll();
    }
 }

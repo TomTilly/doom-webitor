@@ -3,18 +3,15 @@ import Editor, { EditorMode } from './Editor';
 import DoomMap from './DoomMap';
 import { THING_SIZE, POINT_SIZE } from './constants';
 import Thing from './Thing';
-import Point from './Point';
 
 export default class MapView {
    private canvas: HTMLCanvasElement;
    private editor: Editor;
    private container: HTMLElement;
    private ctx: CanvasRenderingContext2D;
-   private movementX: number;
-   private movementY: number;
    private _isMouseDown = false;
    public keysPressed: Set<string> = new Set<string>();
-   private gridSize: 8 | 16 | 32 | 64 = 32;
+   public gridSize: 8 | 16 | 32 | 64 = 32;
 
    constructor(canvas: HTMLCanvasElement, editor: Editor) {
       this.canvas = canvas;
@@ -98,14 +95,13 @@ export default class MapView {
 
       canvas.addEventListener('mousedown', (event) => {
          this.isMouseDown = true;
-         const worldPoint = this.editor.canvasToWorld(event);
 
          switch (this.editor.mode) {
             case EditorMode.select:
-               this.editor.selectObject(worldPoint);
+               this.editor.selectObject(event);
                break;
             case EditorMode.vertex:
-               this.editor.selectObject(worldPoint);
+               this.editor.selectObject(event);
                break;
             case EditorMode.line:
                break;
@@ -122,10 +118,9 @@ export default class MapView {
          event.preventDefault(); // prevent selection of text
          if (!this.isMouseDown) return;
 
-         const worldPoint = this.editor.canvasToWorld(event);
          const { movementX, movementY } = event;
-         this.movementX = movementX;
-         this.movementY = movementY;
+         // this.movementX = movementX;
+         // this.movementY = movementY;
 
          // Scrolling
          switch (this.editor.mode) {
@@ -138,7 +133,7 @@ export default class MapView {
             case EditorMode.line:
             case EditorMode.thing:
                // move anything selected
-               this.editor.dragObjects(worldPoint);
+               this.editor.dragObjects(event);
                this.drawMap(editor.map);
                break;
             default:
