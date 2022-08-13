@@ -17,19 +17,17 @@ export default class MapView {
       this.canvas = canvas;
       this.editor = editor;
 
+      const context = canvas.getContext('2d');
+      if (context === null) {
+         throw new Error('2D context is null');
+      }
+      this.ctx = context;
+
       // Set initial canvas width and height and get 2D context
       this.setCanvasSize(
          this.editor.map.bounds.width,
          this.editor.map.bounds.height
       );
-
-      const context = canvas.getContext('2d');
-
-      if (context === null) {
-         throw new Error('2D context is null');
-      }
-
-      this.ctx = context;
 
       // Set container
 
@@ -153,8 +151,22 @@ export default class MapView {
    }
 
    setCanvasSize(width: number, height: number) {
-      this.canvas.width = width;
-      this.canvas.height = height;
+      const scale = window.devicePixelRatio;
+
+      if (scale !== 1) {
+         console.log('pixel ratio: ', window.devicePixelRatio);
+
+         this.canvas.width = Math.floor(width * scale);
+         this.canvas.height = Math.floor(height * scale);
+
+         this.ctx.scale(scale, scale);
+
+         this.canvas.style.width = '${width}px';
+         this.canvas.style.height = '${height}px';
+      } else {
+         this.canvas.width = width;
+         this.canvas.height = height;
+      }
    }
 
    get isMouseDown() {
@@ -214,6 +226,7 @@ export default class MapView {
 
       ctx.save(); // ensure following translation is always from (0, 0)
       ctx.translate(-map.bounds.origin.x, -map.bounds.origin.y);
+      // ctx.translate(0.5, 0.5);
       ctx.clearRect(
          map.bounds.origin.x,
          map.bounds.origin.y,

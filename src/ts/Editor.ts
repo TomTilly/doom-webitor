@@ -53,25 +53,23 @@ export default class Editor {
       const dy = this.currentDragPoint.y - this.prevDragPoint.y;
       console.log({ dx, dy });
 
-      // console.table({ cursor: this.cursor, dragStart: this.dragStart });
+      this.map.vertices
+         .filter((vertex) => vertex.selected === true)
+         .forEach((vertex) => {
+            const nearestGridPoint = this.getGridPoint(vertex.origin);
+            vertex.origin.x = nearestGridPoint.x + dx;
+            vertex.origin.y = nearestGridPoint.y + dy;
+         });
 
       this.map.things
          .filter((thing) => thing.selected === true)
          .forEach((thing) => {
-            // const closestGridPoint =
-            // Get difference between thing origin and the drag start
             const nearestGridPoint = this.getGridPoint(thing.origin);
 
             thing.origin.x = nearestGridPoint.x + dx;
             thing.origin.y = nearestGridPoint.y + dy;
          });
 
-      this.map.vertices
-         .filter((vertex) => vertex.selected === true)
-         .forEach((vertex) => {
-            vertex.origin.x += this.prevDragPoint.x;
-            vertex.origin.y += this.prevDragPoint.y;
-         });
       this.prevDragPoint = this.currentDragPoint;
    }
 
@@ -118,7 +116,16 @@ export default class Editor {
       if (this.mode === EditorMode.select || this.mode === EditorMode.vertex) {
          for (const vertex of this.map.vertices) {
             if (clickRect.containsPoint(vertex.origin)) {
-               vertex.selected = true;
+               if (vertex.selected) {
+                  if (this.mapView.keysPressed.has('Shift')) {
+                     vertex.selected = false;
+                  }
+               } else {
+                  if (!this.mapView.keysPressed.has('Shift')) {
+                     this.deselectAll();
+                  }
+                  vertex.selected = true;
+               }
                this.currentDragPoint = this.getGridPoint(
                   this.canvasToWorld(event)
                );
@@ -131,6 +138,7 @@ export default class Editor {
       }
 
       // TODO: try to select a line
+      /*
       if (this.mode === EditorMode.select || this.mode === EditorMode.line) {
          for (const line of this.map.lines) {
             const point1 = this.map.vertices[line.vertex1].origin;
@@ -141,6 +149,7 @@ export default class Editor {
             }
          }
       }
+      */
 
       // try to select a thing
       if (this.mode === EditorMode.select || this.mode === EditorMode.thing) {
@@ -161,13 +170,13 @@ export default class Editor {
                      this.deselectAll();
                   }
                   thing.selected = true;
-                  this.currentDragPoint = this.getGridPoint(
-                     this.canvasToWorld(event)
-                  );
-                  this.prevDragPoint = this.getGridPoint(
-                     this.canvasToWorld(event)
-                  );
                }
+               this.currentDragPoint = this.getGridPoint(
+                  this.canvasToWorld(event)
+               );
+               this.prevDragPoint = this.getGridPoint(
+                  this.canvasToWorld(event)
+               );
                return;
             }
          }
