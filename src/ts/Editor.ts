@@ -43,31 +43,44 @@ export default class Editor {
    //    this.mapView.drawMap(this.map);
    // }
 
-   cursor: Point = new Point();
-   dragged: Point = new Point();
+   currentDragPoint: Point = new Point();
+   prevDragPoint: Point = new Point();
    dragObjects(event: MouseEvent): void {
-      this.cursor = this.canvasToWorldGridPoint(event);
+      this.currentDragPoint = this.getGridPoint(this.canvasToWorld(event));
+
+      // Get difference between current cursor position and the starting drag position
+      const dx = this.currentDragPoint.x - this.prevDragPoint.x;
+      const dy = this.currentDragPoint.y - this.prevDragPoint.y;
+      console.log({ dx, dy });
+
+      // console.table({ cursor: this.cursor, dragStart: this.dragStart });
 
       this.map.things
          .filter((thing) => thing.selected === true)
          .forEach((thing) => {
-            thing.origin.x += this.cursor.x - this.dragged.x;
-            thing.origin.y += this.cursor.y - this.dragged.y;
+            // const closestGridPoint =
+            // Get difference between thing origin and the drag start
+            const nearestGridPoint = this.getGridPoint(thing.origin);
+
+            thing.origin.x = nearestGridPoint.x + dx;
+            thing.origin.y = nearestGridPoint.y + dy;
          });
 
-      this.dragged = this.cursor;
+      this.map.vertices
+         .filter((vertex) => vertex.selected === true)
+         .forEach((vertex) => {
+            vertex.origin.x += this.prevDragPoint.x;
+            vertex.origin.y += this.prevDragPoint.y;
+         });
+      this.prevDragPoint = this.currentDragPoint;
    }
 
-   canvasToWorldGridPoint(event: MouseEvent): Point {
-      const worldPoint = this.canvasToWorld(event);
-
+   getGridPoint(point: Point): Point {
       // Get nearest grid point
       const gridX =
-         Math.round(worldPoint.x / this.mapView.gridSize) *
-         this.mapView.gridSize;
+         Math.round(point.x / this.mapView.gridSize) * this.mapView.gridSize;
       const gridY =
-         Math.round(worldPoint.y / this.mapView.gridSize) *
-         this.mapView.gridSize;
+         Math.round(point.y / this.mapView.gridSize) * this.mapView.gridSize;
       return new Point(gridX, gridY);
    }
 
@@ -106,6 +119,12 @@ export default class Editor {
          for (const vertex of this.map.vertices) {
             if (clickRect.containsPoint(vertex.origin)) {
                vertex.selected = true;
+               this.currentDragPoint = this.getGridPoint(
+                  this.canvasToWorld(event)
+               );
+               this.prevDragPoint = this.getGridPoint(
+                  this.canvasToWorld(event)
+               );
                return;
             }
          }
@@ -142,8 +161,12 @@ export default class Editor {
                      this.deselectAll();
                   }
                   thing.selected = true;
-                  this.cursor = this.canvasToWorldGridPoint(event);
-                  this.dragged = this.canvasToWorldGridPoint(event);
+                  this.currentDragPoint = this.getGridPoint(
+                     this.canvasToWorld(event)
+                  );
+                  this.prevDragPoint = this.getGridPoint(
+                     this.canvasToWorld(event)
+                  );
                }
                return;
             }
