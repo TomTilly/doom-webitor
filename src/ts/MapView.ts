@@ -147,26 +147,33 @@ export default class MapView {
          this.isMouseDown = false;
       });
 
+      // update the retina scaling when changing monitors/resolutions
+      const pixelRatio = window.devicePixelRatio;
+      matchMedia(`(resolution: ${pixelRatio}dppx)`).addEventListener(
+         'change',
+         () => {
+            this.setCanvasSize(
+               this.editor.map.bounds.width,
+               this.editor.map.bounds.height
+            );
+            this.drawMap(editor.map);
+         }
+      );
+
       this.drawMap(editor.map);
    }
 
    setCanvasSize(width: number, height: number) {
       const scale = window.devicePixelRatio;
+      console.log('pixel ratio: ', window.devicePixelRatio);
 
-      if (scale !== 1) {
-         console.log('pixel ratio: ', window.devicePixelRatio);
+      this.canvas.width = Math.floor(width * scale);
+      this.canvas.height = Math.floor(height * scale);
 
-         this.canvas.width = Math.floor(width * scale);
-         this.canvas.height = Math.floor(height * scale);
+      this.ctx.scale(scale, scale);
 
-         this.ctx.scale(scale, scale);
-
-         this.canvas.style.width = '${width}px';
-         this.canvas.style.height = '${height}px';
-      } else {
-         this.canvas.width = width;
-         this.canvas.height = height;
-      }
+      this.canvas.style.width = `${width}px`;
+      this.canvas.style.height = `${height}px`;
    }
 
    get isMouseDown() {
